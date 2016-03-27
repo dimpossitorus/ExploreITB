@@ -1,4 +1,34 @@
 <resources>
     <string name="app_name">Explore ITB</string>
     <string name="title_activity_maps">Map</string>
+    <string name="camera">Camera</string>
+    <string name="answer">Answer</string>
+    <string name="location">Location Name</string>
+    <string name="submit">Submit</string>
+    <string name="submitAnswer">Submit Answer</string>
+    <!-- String Lokasi
+
+    <string name="gku_barat">GKU Barat</string>
+    <string name="gku_timur">GKU Timur</string>
+    <string name="intel">Indonesia Tenggelam</string>
+    <string name="cc_barat">Campus Center Barat</string>
+    <string name="cc_timur">Campus Center Timur</string>
+    <string name="dpr">DPR</string>
+    <string name="sunken">Sunken Court</string>
+    <string name="perpus">Perpustakaan Pusat</string>
+    <string name="pau">Gedung PAU</string>
+    <string name="kubus">Tugu Kubus</string>
+    -->
+    <string-array name="locList">
+        <item><string name="gku_timur">GKU Timur</string></item>
+        <item><string name="gku_barat">GKU Barat</string></item>
+        <item><string name="intel">Indonesia Tenggelam</string></item>
+        <item><string name="cc_barat">Campus Center Barat</string></item>
+        <item><string name="cc_timur">Campus Center Timur</string></item>
+        <item><string name="dpr">DPR</string></item>
+        <item><string name="oktagon">Oktagon</string></item>
+        <item><string name="perpus">Perpustakaan Pusat</string></item>
+        <item><string name="pau">Gedung PAU</string></item>
+        <item><string name="kubus">Tugu Kubus</string></item>
+    </string-array>
 </resources>
