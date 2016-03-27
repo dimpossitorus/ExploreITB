@@ -18,9 +18,9 @@ import java.util.List;
 
 public class Submit extends AppCompatActivity {
 
-    ServerRequest mRequest;
-    ServerResponse mResponse;
-    TextView mTestView;
+    //ServerRequest mRequest;
+    //ServerResponse mResponse;
+    //TextView mTestView;
 
     //TextView mTestView;
     /*SensorManager mSensorManager;
@@ -31,7 +31,7 @@ public class Submit extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_submit);
 
-        mTestView = (TextView) findViewById(R.id.test);
+       // mTestView = (TextView) findViewById(R.id.test);
 
         /*mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         deviceSensor = mSensorManager.getSensorList(Sensor.TYPE_ALL);*/
@@ -39,8 +39,8 @@ public class Submit extends AppCompatActivity {
         final Spinner locList = (Spinner) findViewById(R.id.locationList);
         Intent intentOne = getIntent();
         //mRequest = new ServerRequest(getPlaceId((int) locList.getSelectedItemId()), intentOne.getDoubleExtra("long",0),intentOne.getDoubleExtra("lat",0),intentOne.getStringExtra("token"));
-        mRequest = new ServerRequest();
-        mResponse = new ServerResponse(mRequest.createJsonObjectAnswer());
+       // mRequest = new ServerRequest();
+        //mResponse = new ServerResponse(mRequest.createJsonObjectAnswer());
         /*Toast.makeText(Submit.this, mResponse.toString(), Toast.LENGTH_SHORT).show();
         Toast.makeText(Submit.this, (new ServerRequest()).toString(), Toast.LENGTH_SHORT).show();
         try {
@@ -55,12 +55,11 @@ public class Submit extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Send the data to the Server
-                mTestView.setText("" + getPlaceId((int) locList.getSelectedItemId()) + "\n" + mRequest.createJsonObjectRequest().toString());
+                //mTestView.setText("" + getPlaceId((int) locList.getSelectedItemId()) + "\n" + mRequest.createJsonObjectRequest().toString());
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("loc", getPlaceId((int) locList.getSelectedItemId()));
                 setResult(RESULT_OK, resultIntent);
                 finish();
-
             }
         });
 

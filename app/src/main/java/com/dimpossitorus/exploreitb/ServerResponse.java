@@ -28,7 +28,13 @@ public class ServerResponse {
         check = 0;
     }
 
-    public ServerResponse(JSONObject response) {
+    public ServerResponse(String _response) {
+        JSONObject response = null;
+        try {
+            response = new JSONObject(_response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         try {
             status = response.getString("status");
             nim = response.getInt("nim");

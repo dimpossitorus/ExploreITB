@@ -48,12 +48,36 @@ public class ServerRequest {
         return token;
     }
 
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
     public void setHeader(String _loc) {
         header = _loc;
     }
 
+    public void setAnswer (String _answer) {
+        answer = _answer;
+    }
+
     public void setNim(int _nim) {
         nim = _nim;
+    }
+
+    public void setLongitude (double _longitude) {
+        longitude = _longitude;
+    }
+
+    public void setLatitude(double _latitude) {
+        latitude = _latitude;
     }
 
     public void setToken(String _token) {
@@ -62,7 +86,7 @@ public class ServerRequest {
 
     public String createStringRequest() {
         return "{\"com\":\""+header+"\"," +
-                "\"nim\":\""+"\""+nim+"\"}";
+                "\"nim\":\""+nim+"\"}";
     }
 
     public String createStringAnswer () {

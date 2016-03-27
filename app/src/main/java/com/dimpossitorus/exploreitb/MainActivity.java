@@ -12,6 +12,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.media.Image;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
 import android.os.Environment;
@@ -23,7 +24,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
+import android.content.res.Configuration;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -90,6 +93,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     Network network;
     private String url;
 
+    private ImageView compass;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +106,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         buildGoogleApiClient();
+
+        compass = (ImageView) findViewById(R.id.compass);
 
         Button cameraButton = (Button) findViewById(R.id.runCamera);
         cameraButton.setOnClickListener(new View.OnClickListener() {
@@ -148,13 +155,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         network = new BasicNetwork(new HurlStack());
         mRequestQueue = new RequestQueue(cache, network);
 
+        mRequest = new ServerRequest();
+
         jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, /*this is the JSON object that will be passed*/ mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         Toast.makeText(MainActivity.this, response.toString(), Toast.LENGTH_SHORT).show();
-                        mResponse = new ServerResponse(response);
+                        mResponse = new ServerResponse(response.toString());
+                        target = mMap.addMarker(new MarkerOptions().position(new LatLng(mResponse.getLatitude(),mResponse.getLongitude())));
                     }
                 }, new Response.ErrorListener() {
 
@@ -193,16 +203,36 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                galleryAddPic();
-            }
             galleryAddPic();
         }
         else if (requestCode ==SUBMIT_INTENT) {
             // Make new request and accept the response
             Log.d("Explore ITB", data.getStringExtra("loc"));
             Toast.makeText(MainActivity.this, "Location : "+data.getStringExtra("loc"), Toast.LENGTH_SHORT).show();
+            mRequest.setAnswer(data.getStringExtra("loc"));
             //mRequest = new ServerRequest(data.getStringExtra("loc"), mResponse.getLongitude(), mResponse.getLatitude(), mResponse.getToken());
+            if (target!=null){
+                target.remove();
+            }
+            while (mResponse.getStatus()!="finish") {
+                jsObjRequest = new JsonObjectRequest
+                        (Request.Method.GET, url, /*this is the JSON object that will be passed*/ mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
+
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Toast.makeText(MainActivity.this, response.toString(), Toast.LENGTH_SHORT).show();
+                                mResponse = new ServerResponse(response.toString());
+                                target = mMap.addMarker(new MarkerOptions().position(new LatLng(mResponse.getLatitude(),mResponse.getLongitude())));
+                            }
+                        }, new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                // TODO Auto-generated method stub
+
+                            }
+                        });
+            }
         }
     }
 
@@ -340,6 +370,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
          */
 
         //Code here to rotate the compass view
+        if (getResources().getConfiguration().orientation == 1) {
+            compass.setRotation(-1 * azimuth_angle);
+        }
+        else {
+            compass.setRotation(-1 * azimuth_angle - 90);
+        }
     }
 
     @Override

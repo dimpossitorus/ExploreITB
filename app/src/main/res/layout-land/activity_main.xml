@@ -55,6 +55,14 @@
         android:layout_above="@+id/googleMaps"
         android:text="@string/answer"/>
 
+    <ImageView
+        android:id="@+id/compass"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@mipmap/compass"
+        android:layout_below="@+id/titleMap"
+        android:layout_alignStart="@+id/runSubmit" />
+
 
 
 </RelativeLayout>
