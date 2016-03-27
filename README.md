@@ -8,10 +8,17 @@
 
 ### Spesifikasi Tampilan
 **Tampilan horizontal**
+
 ![alt text](http://i.imgur.com/ru13HOP.png)
+
+
 **Tampilan vertikal**
+
 ![alt text](http://i.imgur.com/eewpZ72.png)
+
+
 **Tampilan Submit**
+
 ![alt text](http://i.imgur.com/wDgcjf9.png)
 
 
