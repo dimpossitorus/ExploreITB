@@ -94,11 +94,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private ServerRequest mRequest;
     private ServerResponse mResponse;
 
-    private RequestQueue mRequestQueue;
-    private JsonObjectRequest jsObjRequest;
-    private Cache cache; // 1MB cap
-    Network network;
-
     private final static String url="89.36.220.146";
     //private final static String url="167.205.34.132";
     //private final static String url="google.co.";
@@ -155,7 +150,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 Intent answerIntent = new Intent(MainActivity.this, Submit.class);
                 startActivityForResult(answerIntent,SUBMIT_INTENT);
-                //startActivity(answerIntent);
             }
         });
 
@@ -163,35 +157,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
-        //ServerRequest Instantiation
-
-        // OnCreate, access the server
-        mRequestQueue = Volley.newRequestQueue(this);
-        cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
-        network = new BasicNetwork(new HurlStack());
-        mRequestQueue = new RequestQueue(cache, network);
-
         //Initiate mRequest and mResponse
         mRequest = new ServerRequest();
         mResponse = new ServerResponse();
-        /*
-        jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, /*this is the JSON object that will be passed* mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Toast.makeText(MainActivity.this, response.toString(), Toast.LENGTH_SHORT).show();
-                        mResponse = new ServerResponse(response.toString());
-                        target = mMap.addMarker(new MarkerOptions().position(new LatLng(mResponse.getLatitude(),mResponse.getLongitude())));
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });*/
         JSONObject json = new JSONObject() ;
         try {
             json.put("com", "req_loc");
@@ -240,30 +208,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             mRequest.setAnswer(data.getStringExtra("loc"));
             mRequest = new ServerRequest(data.getStringExtra("loc"), mResponse.getLongitude(), mResponse.getLatitude(), mResponse.getToken());
             new ClientTask().execute(mRequest.createStringAnswer());
-            //mRequest = new ServerRequest(data.getStringExtra("loc"), mResponse.getLongitude(), mResponse.getLatitude(), mResponse.getToken());
-            /*
-            if (target!=null){
-                target.remove();
-            }
-            while (mResponse.getStatus()!="finish") {
-                jsObjRequest = new JsonObjectRequest
-                        (Request.Method.GET, url, /*this is the JSON object that will be passed* mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
-
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Toast.makeText(MainActivity.this, response.toString(), Toast.LENGTH_SHORT).show();
-                                mResponse = new ServerResponse(response.toString());
-                                target = mMap.addMarker(new MarkerOptions().position(new LatLng(mResponse.getLatitude(),mResponse.getLongitude())));
-                            }
-                        }, new Response.ErrorListener() {
-
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // TODO Auto-generated method stub
-
-                            }
-                        });
-            } */
         }
     }
 
