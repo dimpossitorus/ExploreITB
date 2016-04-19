@@ -28,7 +28,7 @@ public class ServerRequest {
     }
 
     public ServerRequest(String _answer, double _long, double _lat, String _token) {
-        header = "com";
+        header = "answer";
         answer = _answer;
         nim = 13513083;
         longitude = _long;

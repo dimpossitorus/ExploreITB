@@ -28,6 +28,15 @@ public class ServerResponse {
         check = 0;
     }
 
+    public ServerResponse(String _status, double _longitude, double _latitude, String _token, int check) {
+        status = _status;
+        nim = 13513083;
+        longitude = _longitude;
+        latitude = _latitude;
+        token = _token;
+        check = 0;
+    }
+
     public ServerResponse(String _response) {
         JSONObject response = null;
         try {

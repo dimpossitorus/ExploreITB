@@ -15,6 +15,7 @@ import android.location.Location;
 import android.media.Image;
 import android.media.browse.MediaBrowser;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -54,13 +55,19 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 import org.apache.http.params.HttpParams;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -71,7 +78,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 0;
+    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 2;
     private static final int SUBMIT_INTENT = 1;
     private Uri fileUri;
     //Orientation Sensor
@@ -91,7 +98,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private JsonObjectRequest jsObjRequest;
     private Cache cache; // 1MB cap
     Network network;
-    private String url;
+
+    private final static String url="89.36.220.146";
+    //private final static String url="167.205.34.132";
+    //private final static String url="google.co.";
+    private final int port = 3111;
+    private final int nim = 13513083;
+    private String msg_send;
+    PrintWriter _send  ;
+    BufferedReader _receive  ;
+
+    private final static String TAG = "ExploreITB";
 
     private ImageView compass;
 
@@ -149,16 +166,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         //ServerRequest Instantiation
 
         // OnCreate, access the server
-        url="167.205.24.132";
         mRequestQueue = Volley.newRequestQueue(this);
         cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap
         network = new BasicNetwork(new HurlStack());
         mRequestQueue = new RequestQueue(cache, network);
 
+        //Initiate mRequest and mResponse
         mRequest = new ServerRequest();
-
+        mResponse = new ServerResponse();
+        /*
         jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, /*this is the JSON object that will be passed*/ mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
+                (Request.Method.GET, url, /*this is the JSON object that will be passed* mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
@@ -173,8 +191,18 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         // TODO Auto-generated method stub
 
                     }
-                });
-
+                });*/
+        JSONObject json = new JSONObject() ;
+        try {
+            json.put("com", "req_loc");
+            json.put("nim",nim);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String ms = json.toString();
+        msg_send = ms ;
+        Log.i(TAG, ms);
+        new ClientTask().execute(ms);
     }
 
     @Override
@@ -210,13 +238,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("Explore ITB", data.getStringExtra("loc"));
             Toast.makeText(MainActivity.this, "Location : "+data.getStringExtra("loc"), Toast.LENGTH_SHORT).show();
             mRequest.setAnswer(data.getStringExtra("loc"));
+            mRequest = new ServerRequest(data.getStringExtra("loc"), mResponse.getLongitude(), mResponse.getLatitude(), mResponse.getToken());
+            new ClientTask().execute(mRequest.createStringAnswer());
             //mRequest = new ServerRequest(data.getStringExtra("loc"), mResponse.getLongitude(), mResponse.getLatitude(), mResponse.getToken());
+            /*
             if (target!=null){
                 target.remove();
             }
             while (mResponse.getStatus()!="finish") {
                 jsObjRequest = new JsonObjectRequest
-                        (Request.Method.GET, url, /*this is the JSON object that will be passed*/ mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
+                        (Request.Method.GET, url, /*this is the JSON object that will be passed* mRequest.createJsonObjectRequest(), new Response.Listener<JSONObject>() {
 
                             @Override
                             public void onResponse(JSONObject response) {
@@ -232,7 +263,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                             }
                         });
-            }
+            } */
         }
     }
 
@@ -383,5 +414,105 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // Do nothing
         // But, actually I don't know what's the function of this
         // Holy Shit
+    }
+
+    private class ClientTask extends AsyncTask<String,Void,String> {
+        String msg_send ;
+
+        @Override
+        protected String doInBackground(String... params) {
+            msg_send = params[0];
+            Log.i("ExploreITB","Message to send : "+msg_send);
+            Socket s = null ;
+            try {
+                s =new Socket (url,port);
+                Log.i(TAG,"Socket created");
+            } catch (UnknownHostException e) {
+                Log.i(TAG,"Unknown host create socket exception");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.i(TAG,"IOExc create socket");
+                e.printStackTrace();
+            }
+            Log.i(TAG,"Create socket done");
+            try {
+                _send = new PrintWriter(s.getOutputStream(),true);
+                _receive = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            } catch (IOException e) {
+                Log.i(TAG,"IOExc _send _receive");
+            }
+            Log.i(TAG, "Sending message ");
+            _send.write(msg_send + "\n");
+            _send.flush();
+            Log.i(TAG, "Send done. Wait for receive . . .");
+            String response="" ;
+            try {
+                response = _receive.readLine();
+            } catch (Exception e) {
+                Log.i(TAG,"Read response exception");
+            }
+            Log.i(TAG,"response : "+response);
+            return response ;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            JSONObject obj=null ;
+            try {
+                obj = new JSONObject(result);
+            } catch (JSONException e) {
+                Log.i(TAG,"Convert string to json exception");
+            }
+            try {
+                String status = obj.getString("status");
+                if (status.contains("ok")) {
+                    String nim = obj.getString("nim");
+                    String token = obj.getString("token");
+                    double longi = obj.getDouble("longitude");
+                    double lati = obj.getDouble("latitude");
+                    now.remove();
+                    mResponse = new ServerResponse("ok", longi, lati, token, 0);
+                    //mResponse.setLongitude(longi);
+                    //mResponse.setLatitude(lati);
+                    //mResponse.setToken(token);
+
+                    LatLng pos = new LatLng(mResponse.getLatitude(),mResponse.getLongitude());
+                    now = mMap.addMarker(new MarkerOptions().position(pos).title("New Marker"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 17));
+                    String temp = "Stat : "+status+" Token : "+token+" nim : "+nim+" longi : "+mResponse.getLongitude()+" lati : "+mResponse.getLongitude() ;
+                    Log.i(TAG,"Parse result : "+temp);
+                    Toast.makeText(getApplicationContext(), "New position to find : {"+mResponse.getLatitude()+","+mResponse.getLongitude()+"}",
+                            Toast.LENGTH_LONG).show();
+                } else if (status.contains("wrong_answer")) {
+                    String token = obj.getString("token");
+                    mRequest.setToken(token); ;
+                    Toast.makeText(getApplicationContext(), "Wrong Answer",
+                            Toast.LENGTH_LONG).show();
+                } else if (status.contains("finish")) {
+                    String token = obj.getString("token");
+                    Toast.makeText(getApplicationContext(), "Finish. Marker will move to default position",
+                            Toast.LENGTH_LONG).show();
+                    LatLng itb = new LatLng(-6.89148, 107.6095648);
+                    now = mMap.addMarker(new MarkerOptions().position(itb).title("Marker in Sydney"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(itb, 17));
+                } else if (status.contains("err")) {
+                    String nim = obj.getString("nim");
+                    String token = obj.getString("token");
+                    if (nim.length()<1) {
+                        Toast.makeText(getApplicationContext(), "No NIM send. Please re-open the application",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No command send. Please re-open the application",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+
+
+            } catch (JSONException e) {
+                Log.i("ExploreITB","Exception in parse JSON");
+            }
+
+        }
     }
 }
